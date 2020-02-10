@@ -56,10 +56,8 @@ def tacred_scorer(predict_label, true_label):
 class Eval(object):
     def __init__(self, config):
         self.device = config.device
-        self.result_path = config.result_path
-        self.data_name = config.data_name
 
-    def evaluate(self, model, criterion, data_loader, save=False):
+    def evaluate(self, model, criterion, data_loader):
         predict_label = []
         true_label = []
         total_loss = 0.0
@@ -74,19 +72,13 @@ class Eval(object):
                 total_loss += loss.item() * logits.shape[0]
 
                 _, pred = torch.max(logits, dim=1)  # replace softmax with max function, same results
-                pred = pred.cpu().numpy().reshape((-1, 1))
-                label = label.cpu().numpy().reshape((-1, 1))
+                pred = pred.cpu().detach().numpy().reshape((-1, 1))
+                label = label.cpu().detach().numpy().reshape((-1, 1))
                 predict_label.append(pred)
                 true_label.append(label)
         predict_label = np.concatenate(predict_label, axis=0).reshape(-1).astype(np.int64)
         true_label = np.concatenate(true_label, axis=0).reshape(-1).astype(np.int64)
         eval_loss = total_loss / predict_label.shape[0]
 
-        f1 = None
-        if self.data_name == 'semeval':
-            f1 = semeval_scorer(predict_label, true_label)
-        elif self.data_name == 'tacred':
-            f1 = tacred_scorer(predict_label, true_label)
-        else:
-            pass
+        f1 = tacred_scorer(predict_label, true_label)
         return f1, eval_loss, predict_label
