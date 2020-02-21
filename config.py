@@ -51,11 +51,11 @@ class Config(object):
 
         # word embedding
         parser.add_argument('--embedding_path', type=str,
-                            default='/data6/htwang/resource/embedding/glove/glove.6B.50d.txt',
+                            default='/data6/htwang/resource/embedding/glove/glove.6B.200d.txt',
                             help='pre_trained word embedding')
 
         parser.add_argument('--word_dim', type=int,
-                            default=50,
+                            default=200,
                             help='dimension of word embedding')
 
         # train settings
@@ -77,6 +77,9 @@ class Config(object):
                             help='max epoches during training')
 
         # hyper parameters
+        parser.add_argument('--word_dropout', type=float,
+                            default='0.04',
+                            help='randomly set a token to be <UNK>')
         parser.add_argument('--dropout', type=float,
                             default='0.5',
                             help='the possiblity of dropout')
@@ -89,9 +92,9 @@ class Config(object):
         parser.add_argument('--max_len', type=int,
                             default=100,
                             help='max length of sentence')
-        parser.add_argument('--pos_dis', type=int,
-                            default=50,
-                            help='max distance of position embedding')
+        parser.add_argument('--att_len', type=int,
+                            default=200,
+                            help='the size of attention layer')
         parser.add_argument('--pos_dim', type=int,
                             default=30,
                             help='dimension of position embedding')
@@ -104,8 +107,8 @@ class Config(object):
                             default=2,
                             help='num of RNN layers')
 
-        parser.add_argument('--L2_decay', type=float, default='1e-3',
-                            help='L2 weight decay')
+        # parser.add_argument('--L2_decay', type=float, default='1e-3',
+        #                     help='L2 weight decay')
 
         args = parser.parse_args()
         return args

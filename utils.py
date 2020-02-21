@@ -32,7 +32,7 @@ class WordEmbeddingLoader(object):
                         'OBJ-CITY', 'OBJ-MISC', 'OBJ-STATE_OR_PROVINCE',
                         'OBJ-DURATION', 'OBJ-NATIONALITY', 'OBJ-CAUSE_OF_DEATH',
                         'OBJ-CRIMINAL_CHARGE', 'OBJ-RELIGION', 'OBJ-URL',
-                        'OBJ-IDEOLOGY', 'Entity1', 'Entity2']
+                        'OBJ-IDEOLOGY']
         for sc in special_char:
             word2id[sc] = len(word2id)
 
@@ -43,25 +43,6 @@ class WordEmbeddingLoader(object):
                     continue
                 word2id[line[0]] = len(word2id)
                 word_vec.append(np.asarray(line[1:], dtype=np.float32))
-
-        # word_vec = np.stack(word_vec).reshape(-1, self.word_dim)
-        # vec_mean, vec_std = word_vec.mean(), word_vec.std()
-        # extra_vec = np.random.normal(
-        #     vec_mean, vec_std, size=(2, self.word_dim))
-
-        # special_char = ['SUBJ-ORGANIZATION', 'SUBJ-PERSON', 'OBJ-PERSON',
-        #                 'OBJ-ORGANIZATION', 'OBJ-DATE', 'OBJ-NUMBER',
-        #                 'OBJ-TITLE', 'OBJ-COUNTRY', 'OBJ-LOCATION',
-        #                 'OBJ-CITY', 'OBJ-MISC', 'OBJ-STATE_OR_PROVINCE',
-        #                 'OBJ-DURATION', 'OBJ-NATIONALITY', 'OBJ-CAUSE_OF_DEATH',
-        #                 'OBJ-CRIMINAL_CHARGE', 'OBJ-RELIGION', 'OBJ-URL',
-        #                 'OBJ-IDEOLOGY', 'Entity1', 'Entity2']
-        # for sc in special_char:
-        #     word2id[sc] = len(word2id)
-        # special_emb = np.random.uniform(-1, 1,
-        #                                 (len(special_char), self.word_dim))
-
-        # word_vec = np.concatenate((extra_vec, word_vec, special_emb), axis=0)
 
         special_emb = np.random.uniform(-1, 1, (len(special_char)+2, self.word_dim))
         word_vec = np.concatenate((special_emb, word_vec), axis=0)
@@ -97,18 +78,19 @@ class TacredDateset(Dataset):
         self.filename = filename
         self.rel2id = rel2id
         self.word2id = word2id
-        self.pos_dis = config.pos_dis
         self.max_len = config.max_len
         self.data_dir = config.data_dir
         self.dataset, self.label = self.__load_data()
 
     def __get_pos_index(self, x):
-        if x < -self.pos_dis:
-            return 0
-        if x >= -self.pos_dis and x <= self.pos_dis:
-            return x + self.pos_dis + 1
-        if x > self.pos_dis:
-            return 2 * self.pos_dis + 2
+        # if x < -self.pos_dis:
+        #     return 0
+        # if x >= -self.pos_dis and x <= self.pos_dis:
+        #     return x + self.pos_dis + 1
+        # if x > self.pos_dis:
+        #     return 2 * self.pos_dis + 2
+        # assert x + self.max_len >= 0 and x <= self.max_len
+        return x + self.max_len - 1
 
     def __get_relative_pos(self, x, entity_pos):
         if x < entity_pos[0]:
@@ -155,10 +137,17 @@ class TacredDateset(Dataset):
 
                 pos1.append(self.__get_relative_pos(i, e1_pos))
                 pos2.append(self.__get_relative_pos(i, e2_pos))
-
+        # pos1 = self.get_positions(e1_pos[0], e1_pos[1], self.max_len)
+        # pos2 = self.get_positions(e2_pos[0], e2_pos[1], self.max_len)
         unit = np.asarray([words, pos1, pos2, mask], dtype=np.int64)
         unit = np.reshape(unit, newshape=(1, 4, self.max_len))
         return unit
+
+    def get_positions(self, start_idx, end_idx, length):
+        """ Get subj/obj position sequence. """
+        a = list(range(-start_idx, 0)) + [0]*(end_idx - start_idx + 1) + \
+            list(range(1, length-end_idx))
+        return [x+length for x in a]
 
     def __load_data(self):
         path_data_file = os.path.join(self.data_dir, self.filename)
@@ -234,9 +223,18 @@ if __name__ == '__main__':
     word2id, word_vec = WordEmbeddingLoader(config).load_embedding()
     rel2id, id2rel, class_num = RelationLoader(config).get_relation()
     loader = TacredDataLoader(rel2id, word2id, config)
-    test_loader = loader.get_test()
+    test_loader = loader.get_dev()
 
+    min_v, max_v = float('inf'), -float('inf')
     for step, (data, label) in enumerate(test_loader):
-        print(type(data), data.shape)
-        print(type(label), label.shape)
-        break
+        # print(type(data), data.shape)
+        # print(type(label), label.shape)
+        # break
+        pos1 = data[:, 1, :].view(-1, config.max_len)
+        pos2 = data[:, 2, :].view(-1, config.max_len)
+        mask = data[:, 3, :].view(-1, config.max_len)
+        min_v = min(min_v, torch.min(pos1).item())
+        max_v = max(max_v, torch.max(pos1).item())
+        min_v = min(min_v, torch.min(pos2).item())
+        max_v = max(max_v, torch.max(pos2).item())
+    print(min_v, max_v)

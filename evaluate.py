@@ -81,4 +81,4 @@ class Eval(object):
         eval_loss = total_loss / predict_label.shape[0]
 
         f1 = tacred_scorer(predict_label, true_label)
-        return f1, eval_loss, predict_label
+        return f1, eval_loss

@@ -20,7 +20,8 @@ def change_lr(optimizer, new_lr):
 
 def train(model, criterion, loader, config):
     train_loader, dev_loader, _ = loader
-    optimizer = optim.SGD(model.parameters(), lr=config.lr)
+    # optimizer = optim.SGD(model.parameters(), lr=config.lr)
+    optimizer = optim.Adadelta(model.parameters(), lr=config.lr)
 
     print(model)
     print('traning model parameters:')
@@ -35,7 +36,7 @@ def train(model, criterion, loader, config):
     current_lr = config.lr
     global_step = 0
     for epoch in range(1, config.epoch+1):
-        if epoch > 10:
+        if epoch >= 20:
             current_lr *= 0.9
             change_lr(optimizer, current_lr)
 
@@ -50,19 +51,30 @@ def train(model, criterion, loader, config):
             loss.backward()
             optimizer.step()
 
-            global_step += 1
-            if global_step % 200 == 0:
-                _, train_loss, _ = eval_tool.evaluate(model, criterion, train_loader)
-                f1, dev_loss, _ = eval_tool.evaluate(model, criterion, dev_loader)
+            # global_step += 1
+            # if global_step % 200 == 0:
+            #     _, train_loss = eval_tool.evaluate(model, criterion, train_loader)
+            #     f1, dev_loss = eval_tool.evaluate(model, criterion, dev_loader)
 
-                print('[%03d] train_loss: %.3f | dev_loss: %.3f | micro f1 on dev: %.4f'
-                      % (epoch, train_loss, dev_loss, f1), end=' ')
-                if f1 > min_f1:
-                    min_f1 = f1
-                    torch.save(model.state_dict(), os.path.join(config.model_dir, 'model.pkl'))
-                    print('>>> save models!')
-                else:
-                    print()
+            #     print('[%03d] train_loss: %.3f | dev_loss: %.3f | micro f1 on dev: %.4f'
+            #           % (epoch, train_loss, dev_loss, f1), end=' ')
+            #     if f1 > min_f1:
+            #         min_f1 = f1
+            #         torch.save(model.state_dict(), os.path.join(config.model_dir, 'model.pkl'))
+            #         print('>>> save models!')
+            #     else:
+            #         print()
+        _, train_loss = eval_tool.evaluate(model, criterion, train_loader)
+        f1, dev_loss = eval_tool.evaluate(model, criterion, dev_loader)
+
+        print('[%03d] train_loss: %.3f | dev_loss: %.3f | micro f1 on dev: %.4f'
+              % (epoch, train_loss, dev_loss, f1), end=' ')
+        if f1 > min_f1:
+            min_f1 = f1
+            torch.save(model.state_dict(), os.path.join(config.model_dir, 'model.pkl'))
+            print('>>> save models!')
+        else:
+            print()
 
 
 def test(model, criterion, loader, config):
@@ -72,7 +84,7 @@ def test(model, criterion, loader, config):
     _, _, test_loader = loader
     model.load_state_dict(torch.load(os.path.join(config.model_dir, 'model.pkl')))
     eval_tool = Eval(config)
-    f1, test_loss, preds = eval_tool.evaluate(model, criterion, test_loader)
+    f1, test_loss = eval_tool.evaluate(model, criterion, test_loader)
     print('test_loss: %.3f | micro f1 on test:  %.4f' % (test_loss, f1))
 
 
