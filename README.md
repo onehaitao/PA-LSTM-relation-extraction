@@ -23,6 +23,7 @@ The result of my version and that in paper are present as follows:
 | paper | my version |
 | :------: | :------: |
 | 0.651 | 0.6503 |
+
 The training log can be seen in `train.log`.
 
 *Note*:
