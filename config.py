@@ -43,7 +43,7 @@ class Config(object):
 
         # several key selective parameters
         parser.add_argument('--data_dir', type=str,
-                            default='/data6/htwang/resource/data/TACRED',
+                            default='./data',
                             help='dir to load data')
         parser.add_argument('--output_dir', type=str,
                             default='./output',
@@ -51,7 +51,7 @@ class Config(object):
 
         # word embedding
         parser.add_argument('--embedding_path', type=str,
-                            default='/data6/htwang/resource/embedding/glove/glove.6B.200d.txt',
+                            default='./embedding/glove.6B.200d.txt',
                             help='pre_trained word embedding')
 
         parser.add_argument('--word_dim', type=int,
@@ -106,9 +106,6 @@ class Config(object):
         parser.add_argument('--layers_num', type=int,
                             default=2,
                             help='num of RNN layers')
-
-        # parser.add_argument('--L2_decay', type=float, default='1e-3',
-        #                     help='L2 weight decay')
 
         args = parser.parse_args()
         return args

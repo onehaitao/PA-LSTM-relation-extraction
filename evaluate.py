@@ -71,7 +71,7 @@ class Eval(object):
                 loss = criterion(logits, label)
                 total_loss += loss.item() * logits.shape[0]
 
-                _, pred = torch.max(logits, dim=1)  # replace softmax with max function, same results
+                _, pred = torch.max(logits, dim=1)  # replace softmax with max function, same impacts
                 pred = pred.cpu().detach().numpy().reshape((-1, 1))
                 label = label.cpu().detach().numpy().reshape((-1, 1))
                 predict_label.append(pred)

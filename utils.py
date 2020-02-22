@@ -83,13 +83,6 @@ class TacredDateset(Dataset):
         self.dataset, self.label = self.__load_data()
 
     def __get_pos_index(self, x):
-        # if x < -self.pos_dis:
-        #     return 0
-        # if x >= -self.pos_dis and x <= self.pos_dis:
-        #     return x + self.pos_dis + 1
-        # if x > self.pos_dis:
-        #     return 2 * self.pos_dis + 2
-        # assert x + self.max_len >= 0 and x <= self.max_len
         return x + self.max_len - 1
 
     def __get_relative_pos(self, x, entity_pos):
@@ -137,17 +130,9 @@ class TacredDateset(Dataset):
 
                 pos1.append(self.__get_relative_pos(i, e1_pos))
                 pos2.append(self.__get_relative_pos(i, e2_pos))
-        # pos1 = self.get_positions(e1_pos[0], e1_pos[1], self.max_len)
-        # pos2 = self.get_positions(e2_pos[0], e2_pos[1], self.max_len)
         unit = np.asarray([words, pos1, pos2, mask], dtype=np.int64)
         unit = np.reshape(unit, newshape=(1, 4, self.max_len))
         return unit
-
-    def get_positions(self, start_idx, end_idx, length):
-        """ Get subj/obj position sequence. """
-        a = list(range(-start_idx, 0)) + [0]*(end_idx - start_idx + 1) + \
-            list(range(1, length-end_idx))
-        return [x+length for x in a]
 
     def __load_data(self):
         path_data_file = os.path.join(self.data_dir, self.filename)
@@ -162,13 +147,12 @@ class TacredDateset(Dataset):
                 e2_pos = (line['obj_start'], line['obj_end'])
                 label_idx = self.rel2id[label]
 
-                ss, se = line['subj_start'], line['subj_end']  # 头实体span
-                oss, oe = line['obj_start'], line['obj_end']  # 尾实体span
-                sentence[ss:se+1] = ['SUBJ-'+line['subj_type']] * (se-ss+1)  # 替换头实体
-                sentence[oss:oe+1] = ['OBJ-'+line['obj_type']] * (oe-oss+1)  # 替换尾实体
+                ss, se = line['subj_start'], line['subj_end']  # entity1 span
+                oss, oe = line['obj_start'], line['obj_end']  # entity2 span
+                sentence[ss:se+1] = ['SUBJ-'+line['subj_type']] * (se-ss+1)
+                sentence[oss:oe+1] = ['OBJ-'+line['obj_type']] * (oe-oss+1)
 
-                one_sentence = self.__symbolize_sentence(
-                    e1_pos, e2_pos, sentence)
+                one_sentence = self.__symbolize_sentence(e1_pos, e2_pos, sentence)
                 data.append(one_sentence)
                 labels.append(label_idx)
         return data, labels

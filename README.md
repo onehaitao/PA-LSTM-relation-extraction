@@ -13,7 +13,7 @@ Implementation of [Position-aware Attention and Supervised Data Improve Slot Fil
 1. Purchase the dataset and move it in the `data` folder.
 2. Download the embedding and move it in the `embedding` folder. The download script is available in the `embedding` folder.
 3. Run the following the commands to start the program.
-```shellP
+```shell
 python run.py
 ```
 More details can be seen by `python run.py -h`.
@@ -22,7 +22,8 @@ More details can be seen by `python run.py -h`.
 The result of my version and that in paper are present as follows:
 | paper | my version |
 | :------: | :------: |
-| 0.651 | 0.629 |
+| 0.651 | 0.6503 |
+The training log can be seen in `train.log`.
 
 *Note*:
 * Some settings are different from those mentioned in the paper.
