@@ -138,6 +138,5 @@ class PA_LSTM(nn.Module):
         word_emb, pos1_emb, pos2_emb = self.encoder_layer(token, pos1, pos2)
         h = self.lstm_layer(word_emb, mask)
         z = self.attention_layer(h, pos1_emb, pos2_emb, mask)
-        # z = self.dropout(z)
         logits = self.dense(z)
         return logits
