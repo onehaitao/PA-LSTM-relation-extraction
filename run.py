@@ -31,7 +31,7 @@ def train(model, criterion, loader, config):
     print('start to train the model ...')
 
     eval_tool = Eval(config)
-    min_f1 = -float('inf')
+    max_f1 = -float('inf')
     current_lr = config.lr
     f1_history = []
     for epoch in range(1, config.epoch+1):
@@ -51,9 +51,10 @@ def train(model, criterion, loader, config):
 
         print('[%03d] train_loss: %.3f | dev_loss: %.3f | micro f1 on dev: %.4f'
               % (epoch, train_loss, dev_loss, f1), end=' ')
-        if f1 > min_f1:
-            min_f1 = f1
-            torch.save(model.state_dict(), os.path.join(config.model_dir, 'model.pkl'))
+        if f1 > max_f1:
+            max_f1 = f1
+            torch.save(model.state_dict(), os.path.join(
+                config.model_dir, 'model.pkl'))
             print('>>> save models!')
         else:
             print()
@@ -70,7 +71,8 @@ def test(model, criterion, loader, config):
     print('start test ...')
 
     _, _, test_loader = loader
-    model.load_state_dict(torch.load(os.path.join(config.model_dir, 'model.pkl')))
+    model.load_state_dict(torch.load(
+        os.path.join(config.model_dir, 'model.pkl')))
     eval_tool = Eval(config)
     f1, test_loss = eval_tool.evaluate(model, criterion, test_loader)
     print('test_loss: %.3f | micro f1 on test:  %.4f' % (test_loss, f1))
