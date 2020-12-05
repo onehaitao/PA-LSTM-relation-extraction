@@ -29,6 +29,7 @@ The training log can be seen in `train.log`.
 *Note*:
 * Some settings are different from those mentioned in the paper.
 * If you cannot achieve the same result as mine, please check the version of Pytorch.
+* Some errors exists in my code, but on the whole it is right.
 
 ## Reference Link
 * https://github.com/yuhaozhang/tacred-relation
