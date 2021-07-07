@@ -1,4 +1,6 @@
 # PA-LSTM-relation-extraction
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/position-aware-attention-and-supervised-data/relation-extraction-on-tacred)](https://paperswithcode.com/sota/relation-extraction-on-tacred?p=position-aware-attention-and-supervised-data)
+
 Implementation of [Position-aware Attention and Supervised Data Improve Slot Filling](https://www.aclweb.org/anthology/D17-1004.pdf).
 
 ## Environment Requirements
